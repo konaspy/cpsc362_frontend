@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { UserPlus, Search, Pencil, Trash, Users, Mail, IdCard, BookOpen, X } from "lucide-react";
-import { Member } from "@/app/lib/models/Member";
+import { type Member } from "@/app/lib/schemas";
 import { getMembers } from "@/app/lib/api/members";
 import Link from "next/link";
 
