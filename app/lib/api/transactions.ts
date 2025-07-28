@@ -1,4 +1,5 @@
-import { TransactionModel, CreateTransactionRequest, type Transaction } from '../schemas';
+import { TransactionSchema, CreateTransactionRequest, type Transaction } from '../schemas';
+import { z } from 'zod';
 
 const BASE_URL = process.env.BACKEND_URL || "http://127.0.0.1:80";
 const TRANSACTIONS_URL = `${BASE_URL}/api/transactions`;
@@ -20,7 +21,7 @@ export async function getTransactions(query?: URLSearchParams): Promise<Transact
     const data = await response.json();
     console.log(data);
     const list = data.data?.transactions || [];
-    return list.map((transaction: unknown) => TransactionModel.fromJSON(transaction).toJSON());
+    return z.array(TransactionSchema).parse(list);
 }
 
 export async function getTransaction(transactionId: number): Promise<Transaction> {
@@ -33,7 +34,7 @@ export async function getTransaction(transactionId: number): Promise<Transaction
     
     const data = await response.json();
     console.log(data);
-    return TransactionModel.fromJSON(data.data?.transaction).toJSON();
+    return TransactionSchema.parse(data.data?.transaction);
 }
 
 export async function createTransaction(transactionData: CreateTransactionRequest): Promise<Transaction> {
@@ -51,7 +52,7 @@ export async function createTransaction(transactionData: CreateTransactionReques
     
     const data = await response.json();
     console.log(data);
-    return TransactionModel.fromJSON(data.data?.transaction).toJSON();
+    return TransactionSchema.parse(data.data?.transaction);
 }
 
 export async function deleteTransaction(transactionId: number): Promise<{ message: string }> {

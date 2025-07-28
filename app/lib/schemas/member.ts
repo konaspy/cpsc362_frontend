@@ -29,10 +29,16 @@ export type UpdateMemberRequest = z.infer<typeof UpdateMemberSchema>;
 export class MemberModel {
   static schema = MemberSchema;
 
-  constructor(readonly props: Member) {}
+  constructor(private readonly props: Member) {}
 
-  static fromJSON(raw: unknown): MemberModel {
-    return new MemberModel(this.schema.parse(raw));
+  // Accept already-validated data
+  static wrap(data: Member): MemberModel {
+    return new MemberModel(data);
+  }
+
+  // Optional: convenience method for parsing + wrapping
+  static parse(raw: unknown): MemberModel {
+    return MemberModel.wrap(MemberSchema.parse(raw));
   }
 
   get fullName(): string {

@@ -1,4 +1,5 @@
-import { BookModel, CreateBookRequest, UpdateBookRequest, type Book } from '../schemas';
+import { BookSchema, CreateBookRequest, UpdateBookRequest, type Book } from '../schemas';
+import { z } from 'zod';
 
 const BASE_URL = process.env.BACKEND_URL || "http://127.0.0.1:80";
 const BOOKS_URL = `${BASE_URL}/api/books`;
@@ -20,7 +21,7 @@ export async function getBooks(query?: URLSearchParams): Promise<Book[]> {
     const data = await response.json();
     console.log(data);
     const list = data.data?.books || [];
-    return list.map((book: unknown) => BookModel.fromJSON(book).toJSON());
+    return z.array(BookSchema).parse(list);
 }
 
 export async function getBook(bookId: number): Promise<Book> {
@@ -33,7 +34,7 @@ export async function getBook(bookId: number): Promise<Book> {
     
     const data = await response.json();
     console.log(data);
-    return BookModel.fromJSON(data.data?.book).toJSON();
+    return BookSchema.parse(data.data?.book);
 }
 
 export async function createBook(bookData: CreateBookRequest): Promise<Book> {
@@ -51,7 +52,7 @@ export async function createBook(bookData: CreateBookRequest): Promise<Book> {
     
     const data = await response.json();
     console.log(data);
-    return BookModel.fromJSON(data.data?.book).toJSON();
+    return BookSchema.parse(data.data?.book);
 }
 
 export async function updateBook(bookId: number, bookData: UpdateBookRequest): Promise<Book> {
@@ -69,7 +70,7 @@ export async function updateBook(bookId: number, bookData: UpdateBookRequest): P
     
     const data = await response.json();
     console.log(data);
-    return BookModel.fromJSON(data.data?.book).toJSON();
+    return BookSchema.parse(data.data?.book);
 }
 
 export async function deleteBook(bookId: number): Promise<{ message: string }> {

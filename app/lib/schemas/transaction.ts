@@ -36,10 +36,16 @@ export type UpdateTransactionRequest = z.infer<typeof UpdateTransactionSchema>;
 export class TransactionModel {
   static schema = TransactionSchema;
 
-  constructor(readonly props: Transaction) {}
+  constructor(private readonly props: Transaction) {}
 
-  static fromJSON(raw: unknown): TransactionModel {
-    return new TransactionModel(this.schema.parse(raw));
+  // Accept already-validated data
+  static wrap(data: Transaction): TransactionModel {
+    return new TransactionModel(data);
+  }
+
+  // Optional: convenience method for parsing + wrapping
+  static parse(raw: unknown): TransactionModel {
+    return TransactionModel.wrap(TransactionSchema.parse(raw));
   }
 
   get isOverdue(): boolean {

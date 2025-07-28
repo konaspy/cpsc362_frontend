@@ -26,10 +26,16 @@ export type UpdateBookRequest = z.infer<typeof UpdateBookSchema>;
 export class BookModel {
   static schema = BookSchema;
 
-  constructor(readonly props: Book) {}
+  constructor(private readonly props: Book) {}
 
-  static fromJSON(raw: unknown): BookModel {
-    return new BookModel(this.schema.parse(raw));
+  // Accept already-validated data
+  static wrap(data: Book): BookModel {
+    return new BookModel(data);
+  }
+
+  // Optional: convenience method for parsing + wrapping
+  static parse(raw: unknown): BookModel {
+    return BookModel.wrap(BookSchema.parse(raw));
   }
 
   get displayTitle(): string {

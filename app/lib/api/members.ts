@@ -1,4 +1,5 @@
-import { MemberModel, CreateMemberRequest, UpdateMemberRequest, type Member } from '../schemas';
+import { MemberSchema, CreateMemberRequest, UpdateMemberRequest, type Member } from '../schemas';
+import { z } from 'zod';
 
 const BASE_URL = process.env.BACKEND_URL || "http://127.0.0.1:80";
 const M_URL = `${BASE_URL}/api/members`;
@@ -20,7 +21,7 @@ export async function getMembers(query?: URLSearchParams): Promise<Member[]> {
     const data = await response.json();
     console.log(data);
     const list = data.data?.members || [];
-    return list.map((member: unknown) => MemberModel.fromJSON(member).toJSON());
+    return z.array(MemberSchema).parse(list);
 }
 
 export async function getMember(memberId: number): Promise<Member> {
@@ -33,7 +34,7 @@ export async function getMember(memberId: number): Promise<Member> {
     
     const data = await response.json();
     console.log(data);
-    return MemberModel.fromJSON(data.data?.member || data).toJSON();
+    return MemberSchema.parse(data.data?.member || data);
 }
 
 export async function createMember(memberData: CreateMemberRequest): Promise<Member> {
@@ -51,7 +52,7 @@ export async function createMember(memberData: CreateMemberRequest): Promise<Mem
     
     const data = await response.json();
     console.log(data);
-    return MemberModel.fromJSON(data.data?.member).toJSON();
+    return MemberSchema.parse(data.data?.member);
 }
 
 export async function updateMember(memberId: number, memberData: UpdateMemberRequest): Promise<Member> {
@@ -69,7 +70,7 @@ export async function updateMember(memberId: number, memberData: UpdateMemberReq
     
     const data = await response.json();
     console.log(data);
-    return MemberModel.fromJSON(data.data?.member).toJSON();
+    return MemberSchema.parse(data.data?.member);
 }
 
 export async function deleteMember(memberId: number): Promise<{ message: string }> {
