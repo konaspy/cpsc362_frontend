@@ -23,6 +23,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { toast } from 'sonner'
+import Demo from '@/test/demo'
 
 // Validation schema
 const schema = z.object({
@@ -34,7 +35,7 @@ const schema = z.object({
 // Form values type
 type FormValues = z.infer<typeof schema>
 
-export default function AddMemberDialog() {
+function OriginalAddMemberDialog() {
   const [open, setOpen] = useState(false)
 
   // React Hook Form setup
@@ -59,12 +60,12 @@ export default function AddMemberDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>Add member</Button>
+        <Button variant="secondary">Original Add Member</Button>
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-[400px]">
         <DialogHeader>
-          <DialogTitle>New member</DialogTitle>
+          <DialogTitle>New member (Original)</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
@@ -120,5 +121,22 @@ export default function AddMemberDialog() {
         </Form>
       </DialogContent>
     </Dialog>
+  )
+}
+
+export default function TestPage() {
+  return (
+    <div className="p-8 space-y-8">
+      <div className="border-b pb-6">
+        <h1 className="text-2xl font-bold mb-4">Before & After Comparison</h1>
+        <div className="flex gap-4">
+          <OriginalAddMemberDialog />
+          <span className="text-gray-400">vs</span>
+          <p className="text-gray-600">New pattern-based dialogs below ↓</p>
+        </div>
+      </div>
+      
+      <Demo />
+    </div>
   )
 }

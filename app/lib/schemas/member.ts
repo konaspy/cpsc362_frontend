@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { PositiveInteger, NonEmptyString } from './common';
+import { PositiveInteger, NonEmptyString, password } from './common';
 
 // Core Member schema for database entities
 export const MemberSchema = z.object({
@@ -15,11 +15,15 @@ export type Member = z.infer<typeof MemberSchema>;
 // Schema for creating new members (no memberID)
 export const CreateMemberSchema = MemberSchema.omit({ memberID: true }).extend({
   username: z.string().min(3, 'Username must be at least 3 characters'),
-  password: z.string().min(6, 'Password must be at least 6 characters')
+  password: password(6, 'Password must be at least 6 characters')
 });
 
 // Schema for updating members (all fields optional except memberID)
-export const UpdateMemberSchema = MemberSchema.partial().omit({ memberID: true });
+export const UpdateMemberSchema = MemberSchema.omit({ memberID: true }).extend({
+  // Optional credentials that only validate when provided (undefined = not provided)
+  username: z.string().min(3, 'Username must be at least 3 characters').optional(),
+  password: z.string().min(6, 'Password must be at least 6 characters').optional()
+}).partial();
 
 // Inferred types for requests
 export type CreateMemberRequest = z.infer<typeof CreateMemberSchema>;
