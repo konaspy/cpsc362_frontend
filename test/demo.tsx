@@ -37,9 +37,7 @@ const AddMemberDialog = createSchemaDialog({
     { name: 'username', label: 'Username', placeholder: 'Enter username' },
     { name: 'password', label: 'Password', type: 'password', placeholder: 'Enter password' },
   ],
-  onSubmit: async (data: CreateMemberRequest) => {
-    await createMember(data)
-  },
+  onSubmit: createMember, // Return the created member data for confirmation
 })
 
 const AddBookDialog = createSchemaDialog({
@@ -50,31 +48,17 @@ const AddBookDialog = createSchemaDialog({
     { name: 'authorName', label: 'Author Name', placeholder: 'Enter author name' },
     { name: 'isbn', label: 'ISBN', placeholder: 'Enter ISBN' },
   ],
-  onSubmit: async (data: CreateBookRequest) => {
-    await createBook(data)
-  },
+  onSubmit: createBook, // Return the created book data for confirmation
 })
 
 const AddTransactionDialog = createSchemaDialog({
   schema: CreateTransactionSchema,
   title: 'Add Transaction',
   fields: [
-    { 
-      name: 'bookID', 
-      label: 'Book', 
-      type: 'select',
-      options: [] // Will be populated dynamically - this is a simplified version
-    },
-    { 
-      name: 'memberID', 
-      label: 'Member', 
-      type: 'select',
-      options: [] // Will be populated dynamically - this is a simplified version
-    },
+    { name: 'bookID', label: 'Book ID', placeholder: 'Enter book ID' },
+    { name: 'memberID', label: 'Member ID', placeholder: 'Enter member ID' },
   ],
-  onSubmit: async (data: CreateTransactionRequest) => {
-    await createTransaction(data)
-  },
+  onSubmit: createTransaction, // Return the created transaction data for confirmation
 })
 
 // Example of using SchemaFormDialog factory pattern
@@ -219,7 +203,10 @@ export default function Demo() {
           <div className="space-y-2">
             <h3 className="text-lg font-medium">📋 Transactions</h3>
             <div className="flex gap-2 flex-wrap">
-              <AddTransactionDialog trigger={<Button>Add Transaction</Button>} />
+              <AddTransactionDialog trigger={<Button>Add Transaction</Button>} placeholders={{
+                bookID: 'Enter book ID',
+                memberID: 'Enter member ID'
+              }}/>
               <EditTransactionDialog 
                 transaction={sampleTransaction}
                 trigger={<Button variant="outline">Edit Transaction</Button>}
