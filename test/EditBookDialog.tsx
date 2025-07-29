@@ -27,8 +27,9 @@ export function EditBookDialog({
   placeholders
 }: EditBookDialogProps) {
   const handleSubmit = async (data: any) => {
-    await updateBook(book.bookID, data)
+    const updatedBook = await updateBook(book.bookID, data)
     if (onSuccess) onSuccess()
+    return updatedBook // Return data to show confirmation
   }
 
   const EditDialog = createSchemaDialog({

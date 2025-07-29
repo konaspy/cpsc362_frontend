@@ -12,6 +12,7 @@ import { type Member } from "@/app/lib/schemas";
 import { getMembers } from "@/app/lib/api/members";
 import { AddMemberDialog, EditMemberDialogWrapper } from "@/components/dialogs/memberDialogs";
 import { useReportCounts } from "@/hooks/use-report-counts";
+import { EditMemberByIdDialog } from "@/components/dialogs/MemberLookupEdit";
 
 export default function MembersPage() {
   const [members, setMembers] = useState<Member[]>([]);
@@ -97,22 +98,13 @@ export default function MembersPage() {
               }
               onSuccess={fetchAllMembers}
             />
-            <EditMemberDialogWrapper
-              member={{ memberID: 0, firstName: '', lastName: '', email: '' }}
+            <EditMemberByIdDialog
               trigger={
                 <Button variant="outline">
                   <Pencil className="h-4 w-4 mr-2" />
                   Edit Member
                 </Button>
               }
-              onSuccess={fetchAllMembers}
-              placeholders={{
-                firstName: 'New first name (optional)',
-                lastName: 'New last name (optional)',
-                email: 'New email (optional)',
-                username: 'Username (optional)',
-                password: 'New password (optional)'
-              }}
             />
           </div>
         </div>

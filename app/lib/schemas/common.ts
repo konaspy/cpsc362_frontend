@@ -52,3 +52,12 @@ export type ProblemDetails = z.infer<typeof ProblemDetailsSchema>;
 // export type PaginationParams = z.infer<typeof PaginationParamsSchema>;
 
 // Search/filter schemas
+
+// ID lookup schema for wildcard edit dialogs
+export const IdLookupSchema = z.object({
+  id: z.number({ message: 'ID is required' })
+        .int()
+        .positive('ID must be positive'),
+});
+
+export type IdLookup = z.infer<typeof IdLookupSchema>;

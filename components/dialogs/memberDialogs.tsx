@@ -42,8 +42,9 @@ export function EditMemberDialogWrapper({
   placeholders
 }: EditMemberDialogProps) {
   const handleSubmit = async (data: any) => {
-    await updateMember(member.memberID, data)
+    const updatedMember = await updateMember(member.memberID, data)
     if (onSuccess) onSuccess()
+    return updatedMember // Return data to show confirmation
   }
 
   // Create a new dialog with the member's current data as defaults
@@ -94,8 +95,9 @@ export function FlexibleEditMemberDialog({
   placeholders
 }: EditMemberDialogProps) {
   const handleSubmit = async (data: any) => {
-    await updateMember(member.memberID, data)
+    const updatedMember = await updateMember(member.memberID, data)
     if (onSuccess) onSuccess()
+    return updatedMember // Return data to show confirmation
   }
 
   const EditDialog = createSchemaDialog({
