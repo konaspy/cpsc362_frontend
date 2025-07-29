@@ -17,7 +17,6 @@ const buildBookEditDialog = (book: any, onSuccess: () => void) =>
     ],
     onSubmit: async (data) => {
       const updatedBook = await updateBook(book.bookID, data)
-      onSuccess()
       return updatedBook // Return data to show confirmation
     },
   })

@@ -4,7 +4,6 @@ import { withLookup } from './LookupEditDialog'
 import { getMember, updateMember } from '@/app/lib/api/members'
 import { UpdateMemberSchema } from '@/app/lib/schemas/member'
 import { createSchemaDialog } from './SchemaFormDialog'
-import { useMemo } from "react";
 
 /* existing "plain" edit dialog factory */
 const buildMemberEditDialog = (member: any, onSuccess: () => void) =>
