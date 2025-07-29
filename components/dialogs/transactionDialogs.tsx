@@ -3,9 +3,22 @@
 import { createSchemaDialog } from './SchemaFormDialog'
 import { CreateTransactionSchema, type Transaction } from '@/app/lib/schemas/transaction'
 import { createTransaction, deleteTransaction } from '@/app/lib/api/transactions'
+import { getBook } from '@/app/lib/api/books'
+import { getMember } from '@/app/lib/api/members'
+import type { Book } from '@/app/lib/schemas/book'
+import type { Member } from '@/app/lib/schemas/member'
 import { Button } from '@/components/ui/button'
-import { Plus, BookCheck } from 'lucide-react'
-import { useState } from 'react'
+import { Plus, BookCheck, X } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose,
+} from '@/components/ui/dialog'
 
 // Types for the dialog props
 interface DeleteTransactionDialogProps {
@@ -35,48 +48,158 @@ export function DeleteTransactionDialog({
   onOpenChange,
   onSuccess
 }: DeleteTransactionDialogProps) {
-  const [isDeleting, setIsDeleting] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [step, setStep] = useState<'confirm' | 'success'>('confirm')
+  const [book, setBook] = useState<Book | null>(null)
+  const [member, setMember] = useState<Member | null>(null)
+  const [loadingInfo, setLoadingInfo] = useState(true)
+  const [processing, setProcessing] = useState(false)
 
-  const handleDelete = async () => {
+  /* ------------------------------------------------------------
+   * Fetch book & member details the first time the dialog opens
+   * ---------------------------------------------------------- */
+  useEffect(() => {
+    if (!dialogOpen) return
+    let ignore = false
+    ;(async () => {
+      try {
+        setLoadingInfo(true)
+        const [b, m] = await Promise.all([
+          getBook(transaction.bookID),
+          getMember(transaction.memberID),
+        ])
+        if (!ignore) {
+          setBook(b)
+          setMember(m)
+        }
+      } finally {
+        if (!ignore) setLoadingInfo(false)
+      }
+    })()
+    return () => {
+      // prevent setting state after unmount
+      ignore = true
+    }
+  }, [dialogOpen, transaction.bookID, transaction.memberID])
+
+  /* ------------------------------------------------------------
+   * Delete the transaction (i.e. return the book)
+   * ---------------------------------------------------------- */
+  async function handleReturn() {
     try {
-      setIsDeleting(true)
+      setProcessing(true)
       await deleteTransaction(transaction.transactionID)
       if (onSuccess) onSuccess()
-      setDialogOpen(false)
-      if (onOpenChange) onOpenChange(false)
-    } catch (error) {
-      console.error('Error returning book:', error)
+      setStep('success')
+    } catch (err) {
+      console.error('Error returning book:', err)
     } finally {
-      setIsDeleting(false)
+      setProcessing(false)
     }
   }
 
-  const handleOpenChange = (open: boolean) => {
-    setDialogOpen(open)
-    if (onOpenChange) onOpenChange(open)
-  }
-
-  const ConfirmDialog = createSchemaDialog({
-    schema: CreateTransactionSchema.pick({}), // Empty schema for confirmation
-    title: 'Return Book',
-    fields: [], // No form fields needed for confirmation
-    onSubmit: async () => {
-      await handleDelete()
-      return true // Show confirmation
-    },
-  })
+  /* ------------------------------------------------------------ */
+  const details = (
+    <div className="space-y-1 text-sm">
+      <div>
+        <span className="font-medium">Transaction&nbsp;ID:</span>{' '}
+        {transaction.transactionID}
+      </div>
+      {book && (
+        <>
+          <div>
+            <span className="font-medium">Book&nbsp;ID:</span> {book.bookID}
+          </div>
+          <div>
+            <span className="font-medium">Title:</span> {book.bookName}
+          </div>
+          <div>
+            <span className="font-medium">Author:</span> {book.authorName}
+          </div>
+        </>
+      )}
+      {member && (
+        <>
+          <div>
+            <span className="font-medium">Member&nbsp;ID:</span>{' '}
+            {member.memberID}
+          </div>
+          <div>
+            <span className="font-medium">Member&nbsp;Name:</span>{' '}
+            {member.firstName} {member.lastName}
+          </div>
+        </>
+      )}
+    </div>
+  )
 
   return (
-    <ConfirmDialog
-      trigger={trigger || (
-        <Button variant="outline" size="sm">
-          <BookCheck className="h-4 w-4 mr-2" />
-          Return
-        </Button>
-      )}
+    <Dialog
       open={open !== undefined ? open : dialogOpen}
-      onOpenChange={handleOpenChange}
-    />
+      onOpenChange={(o) => {
+        if (!o) {
+          // Reset back to initial state for the next time
+          setStep('confirm')
+        }
+        if (onOpenChange) onOpenChange(o)
+        setDialogOpen(o)
+      }}
+    >
+      <DialogTrigger asChild>
+        {trigger || (
+          <Button variant="outline" size="sm">
+            <BookCheck className="h-4 w-4 mr-2" />
+            Return
+          </Button>
+        )}
+      </DialogTrigger>
+
+      <DialogContent className="sm:max-w-[420px]">
+        {step === 'confirm' ? (
+          <>
+            <DialogHeader>
+              <DialogTitle>Return Book – Confirm Details</DialogTitle>
+            </DialogHeader>
+
+            {loadingInfo ? (
+              <p className="text-muted-foreground text-sm">Loading details…</p>
+            ) : (
+              details
+            )}
+
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button variant="outline">
+                  <X className="h-4 w-4 mr-2" />
+                  Cancel
+                </Button>
+              </DialogClose>
+              <Button
+                onClick={handleReturn}
+                disabled={processing || loadingInfo}
+                variant="destructive"
+              >
+                {processing ? 'Returning…' : 'Return Book'}
+              </Button>
+            </DialogFooter>
+          </>
+        ) : (
+          /* ---------------- Success step ---------------- */
+          <>
+            <DialogHeader>
+              <DialogTitle>Book Returned Successfully</DialogTitle>
+            </DialogHeader>
+
+            {details}
+
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button>Done</Button>
+              </DialogClose>
+            </DialogFooter>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
   )
 } 

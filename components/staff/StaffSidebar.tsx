@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/sidebar";
 import { BookOpen, UserPlus, Plus, Home, Users, BookOpenIcon, Receipt, BookOpenCheck, BookDown, Search, Pencil, Trash, ChevronRight } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import Link from "next/link";
 
 const quickActions = [
   {
@@ -153,9 +154,11 @@ export default function StaffSidebar() {
             <SidebarMenu>
               {quickActions.map((action) => (
                 <SidebarMenuItem key={action.label}>
-                  <SidebarMenuButton tooltip={action.label}>
-                    <action.icon className="h-4 w-4" />
-                    <span>{action.label}</span>
+                  <SidebarMenuButton asChild tooltip={action.label}>
+                    <Link href={action.href}>
+                      <action.icon className="h-4 w-4" />
+                      <span>{action.label}</span>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -174,10 +177,10 @@ export default function StaffSidebar() {
                 <Collapsible key={item.label} asChild defaultOpen={false}>
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild tooltip={item.label}>
-                      <a href={item.href}>
+                      <Link href={item.href}>
                         <item.icon className="h-4 w-4" />
                         <span>{item.label}</span>
-                      </a>
+                      </Link>
                     </SidebarMenuButton>
                     {item.items?.length ? (
                       <>
@@ -192,10 +195,10 @@ export default function StaffSidebar() {
                             {item.items?.map((subItem) => (
                               <SidebarMenuSubItem key={subItem.label}>
                                 <SidebarMenuSubButton asChild>
-                                  <a href={subItem.href}>
+                                  <Link href={subItem.href}>
                                     <subItem.icon className="h-4 w-4" />
                                     <span>{subItem.label}</span>
-                                  </a>
+                                  </Link>
                                 </SidebarMenuSubButton>
                               </SidebarMenuSubItem>
                             ))}
