@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { UserPlus, Search, Pencil, Trash, Users, Mail, IdCard, BookOpen, X } from "lucide-react";
 import { type Member } from "@/app/lib/schemas";
 import { getMembers } from "@/app/lib/api/members";
-import { AddMemberDialog, EditMemberDialogWrapper } from "@/components/dialogs/memberDialogs";
+import { AddMemberDialog, EditMemberDialogWrapper, DeleteMemberDialog } from "@/components/dialogs/memberDialogs";
 import { useReportCounts } from "@/hooks/use-report-counts";
 import { EditMemberByIdDialog } from "@/components/dialogs/MemberLookupEdit";
 
@@ -276,9 +276,15 @@ export default function MembersPage() {
                                   }
                                   onSuccess={fetchAllMembers}
                                 />
-                                <Button variant="ghost" size="sm">
-                                  <Trash className="h-4 w-4" />
-                                </Button>
+                                <DeleteMemberDialog
+                                  member={member}
+                                  trigger={
+                                    <Button variant="ghost" size="sm">
+                                      <Trash className="h-4 w-4" />
+                                    </Button>
+                                  }
+                                  onSuccess={fetchAllMembers}
+                                />
                               </div>
                             </td>
                           </tr>

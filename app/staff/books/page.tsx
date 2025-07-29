@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { BookPlus, Search, Pencil, Trash, BookOpen, Library, X, User } from "lucide-react";
 import { type Book } from "@/app/lib/schemas";
 import { getBooks } from "@/app/lib/api/books";
-import { AddBookDialog, EditBookDialogWrapper } from "@/components/dialogs/bookDialogs";
+import { AddBookDialog, EditBookDialogWrapper, DeleteBookDialog } from "@/components/dialogs/bookDialogs";
 import { useReportCounts } from "@/hooks/use-report-counts";
 import { EditBookByIdDialog } from "@/components/dialogs/BookLookupEdit";
 
@@ -280,9 +280,15 @@ export default function BooksPage() {
                                   }
                                   onSuccess={fetchAllBooks}
                                 />
-                                <Button variant="ghost" size="sm">
-                                  <Trash className="h-4 w-4" />
-                                </Button>
+                                <DeleteBookDialog
+                                  book={book}
+                                  trigger={
+                                    <Button variant="ghost" size="sm">
+                                      <Trash className="h-4 w-4" />
+                                    </Button>
+                                  }
+                                  onSuccess={fetchAllBooks}
+                                />
                               </div>
                             </td>
                           </tr>

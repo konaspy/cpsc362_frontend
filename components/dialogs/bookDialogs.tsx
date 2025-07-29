@@ -2,10 +2,20 @@
 
 import { createSchemaDialog } from './SchemaFormDialog'
 import { UpdateBookSchema, CreateBookSchema, type Book } from '@/app/lib/schemas/book'
-import { updateBook, createBook } from '@/app/lib/api/books'
+import { updateBook, createBook, deleteBook } from '@/app/lib/api/books'
 import { Button } from '@/components/ui/button'
-import { Edit, BookPlus } from 'lucide-react'
+import { Edit, BookPlus, Trash, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import { toast } from 'sonner'
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from '@/components/ui/dialog'
 
 // Types for the dialog props
 interface EditBookDialogProps {
@@ -135,5 +145,134 @@ export function FlexibleEditBookDialog({
       onOpenChange={onOpenChange}
       onSuccess={onSuccess}
     />
+  )
+} 
+
+/* ------------------------------------------------------------
+ * Delete Book Dialog (two-step confirmation)
+ * ---------------------------------------------------------- */
+interface DeleteBookDialogProps {
+  book: Book
+  trigger?: React.ReactNode
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+  onSuccess?: () => void
+}
+
+export function DeleteBookDialog({
+  book,
+  trigger,
+  open,
+  onOpenChange,
+  onSuccess,
+}: DeleteBookDialogProps) {
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [step, setStep] = useState<'confirm' | 'success'>('confirm')
+  const [processing, setProcessing] = useState(false)
+
+  async function handleDelete() {
+    try {
+      setProcessing(true)
+      await deleteBook(book.bookID)
+      toast.success(`Book "${book.bookName}" deleted successfully`)
+      if (onSuccess) onSuccess()
+      setStep('success')
+    } catch (err) {
+      console.error('Error deleting book:', err)
+      
+      // Extract meaningful error message from server response
+      let errorMessage = 'Failed to delete book'
+      if (err && typeof err === 'object') {
+        const serverError = err as any
+        if (serverError.detail) {
+          errorMessage = serverError.detail
+        } else if (serverError.title) {
+          errorMessage = serverError.title
+        } else if (serverError.message) {
+          errorMessage = serverError.message
+        } else if (typeof serverError === 'string') {
+          errorMessage = serverError
+        }
+      }
+      
+      toast.error(errorMessage)
+    } finally {
+      setProcessing(false)
+    }
+  }
+
+  return (
+    <Dialog
+      open={open !== undefined ? open : dialogOpen}
+      onOpenChange={(o) => {
+        if (!o) setStep('confirm')
+        if (onOpenChange) onOpenChange(o)
+        setDialogOpen(o)
+      }}
+    >
+      <DialogTrigger asChild>
+        {trigger ?? (
+          <Button variant="ghost" size="sm">
+            <Trash className="h-4 w-4" />
+          </Button>
+        )}
+      </DialogTrigger>
+
+      <DialogContent className="sm:max-w-[420px]">
+        {step === 'confirm' ? (
+          <>
+            <DialogHeader>
+              <DialogTitle>Delete Book – Confirm</DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-1 text-sm">
+              <div>
+                <span className="font-medium">Book&nbsp;ID:</span> {book.bookID}
+              </div>
+              <div>
+                <span className="font-medium">Title:</span> {book.bookName}
+              </div>
+              <div>
+                <span className="font-medium">Author:</span> {book.authorName}
+              </div>
+            </div>
+
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button variant="outline">
+                  <X className="h-4 w-4 mr-2" />
+                  Cancel
+                </Button>
+              </DialogClose>
+              <Button
+                onClick={handleDelete}
+                disabled={processing}
+                variant="destructive"
+              >
+                {processing ? 'Deleting…' : 'Delete'}
+              </Button>
+            </DialogFooter>
+          </>
+        ) : (
+          /* -------------- success step -------------- */
+          <>
+            <DialogHeader>
+              <DialogTitle>Book Deleted</DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-1 text-sm">
+              Book <span className="font-medium">{book.bookName}</span> was
+              removed successfully.
+            </div>
+
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button>Done</Button>
+              </DialogClose>
+            </DialogFooter>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
   )
 } 

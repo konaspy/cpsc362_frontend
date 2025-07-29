@@ -35,9 +35,10 @@ export default function LoginPage() {
       localStorage.setItem('role', data.data.role)
 
       // Route to staff dashboard if role is staff
-      if (data.role === 'staff') {
+      if (data.data.role === 'admin') {
         router.push('/staff')
       } else {
+        alert('Login successful! Welcome ' + data.data.role)
         // For other roles, you can redirect to different pages
         // For now, we'll just show a success message
         router.push('/staff')
@@ -114,7 +115,6 @@ export default function LoginPage() {
           <div className="mt-6 text-center text-sm text-muted-foreground">
             <p>Demo credentials:</p>
             <p>Staff: username = "admin", password = "admin"</p>
-            <p>User: username = "user", password = "password"</p>
           </div>
         </CardContent>
       </Card>

@@ -8,16 +8,11 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
   SidebarSeparator,
 } from "@/components/ui/sidebar";
-import { BookOpen, UserPlus, Plus, Home, Users, BookOpenIcon, Receipt, BookOpenCheck, BookDown, Search, Pencil, Trash, ChevronRight } from "lucide-react";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { BookOpen, UserPlus, Home, Users, BookOpenIcon, Receipt, BookOpenCheck, BookDown } from "lucide-react";
 import Link from "next/link";
 
 const quickActions = [
@@ -48,82 +43,16 @@ const navigation = [
     label: "Books",
     icon: BookOpenIcon,
     href: "/staff/books",
-    items: [
-      {
-        label: "Add",
-        icon: Plus,
-        href: "/staff/books/add",
-      },
-      {
-        label: "Search",
-        icon: Search,
-        href: "/staff/books/search",
-      },
-      {
-        label: "Edit",
-        icon: Pencil,
-        href: "/staff/books/edit",
-      },
-      {
-        label: "Delete",
-        icon: Trash,
-        href: "/staff/books/delete",
-      }
-    ],
   },
   {
     label: "Members",
     icon: Users,
     href: "/staff/members",
-    items: [
-      {
-        label: "Add",
-        icon: Plus,
-        href: "/staff/members/add",
-      },
-      {
-        label: "Search",
-        icon: Search,
-        href: "/staff/members/search",
-      },
-      {
-        label: "Edit",
-        icon: Pencil,
-        href: "/staff/members/edit",
-      },
-      {
-        label: "Delete",
-        icon: Trash,
-        href: "/staff/members/delete",
-      }
-    ],
   },
   {
     label: "Transactions",
     icon: Receipt,
     href: "/staff/transactions",
-    items: [
-      {
-        label: "Add",
-        icon: Plus,
-        href: "/staff/transactions/add",
-      },
-      {
-        label: "Search",
-        icon: Search,
-        href: "/staff/transactions/search",
-      },
-      {
-        label: "Edit",
-        icon: Pencil,
-        href: "/staff/transactions/edit",
-      },
-      {
-        label: "Delete",
-        icon: Trash,
-        href: "/staff/transactions/delete",
-      }
-    ],
   }
 ];
 
@@ -174,40 +103,14 @@ export default function StaffSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {navigation.map((item) => (
-                <Collapsible key={item.label} asChild defaultOpen={false}>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild tooltip={item.label}>
-                      <Link href={item.href}>
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.label}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                    {item.items?.length ? (
-                      <>
-                        <CollapsibleTrigger asChild>
-                          <SidebarMenuAction className="data-[state=open]:rotate-90">
-                            <ChevronRight />
-                            <span className="sr-only">Toggle</span>
-                          </SidebarMenuAction>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
-                          <SidebarMenuSub>
-                            {item.items?.map((subItem) => (
-                              <SidebarMenuSubItem key={subItem.label}>
-                                <SidebarMenuSubButton asChild>
-                                  <Link href={subItem.href}>
-                                    <subItem.icon className="h-4 w-4" />
-                                    <span>{subItem.label}</span>
-                                  </Link>
-                                </SidebarMenuSubButton>
-                              </SidebarMenuSubItem>
-                            ))}
-                          </SidebarMenuSub>
-                        </CollapsibleContent>
-                      </>
-                    ) : null}
-                  </SidebarMenuItem>
-                </Collapsible>
+                <SidebarMenuItem key={item.label}>
+                  <SidebarMenuButton asChild tooltip={item.label}>
+                    <Link href={item.href}>
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
               ))}
             </SidebarMenu>
           </SidebarGroupContent>

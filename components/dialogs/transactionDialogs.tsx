@@ -10,6 +10,7 @@ import type { Member } from '@/app/lib/schemas/member'
 import { Button } from '@/components/ui/button'
 import { Plus, BookCheck, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import {
   Dialog,
   DialogContent,
@@ -89,10 +90,28 @@ export function DeleteTransactionDialog({
     try {
       setProcessing(true)
       await deleteTransaction(transaction.transactionID)
+      toast.success('Book returned successfully')
       if (onSuccess) onSuccess()
       setStep('success')
     } catch (err) {
       console.error('Error returning book:', err)
+      
+      // Extract meaningful error message from server response
+      let errorMessage = 'Failed to return book'
+      if (err && typeof err === 'object') {
+        const serverError = err as any
+        if (serverError.detail) {
+          errorMessage = serverError.detail
+        } else if (serverError.title) {
+          errorMessage = serverError.title
+        } else if (serverError.message) {
+          errorMessage = serverError.message
+        } else if (typeof serverError === 'string') {
+          errorMessage = serverError
+        }
+      }
+      
+      toast.error(errorMessage)
     } finally {
       setProcessing(false)
     }

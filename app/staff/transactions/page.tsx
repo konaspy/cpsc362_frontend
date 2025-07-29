@@ -273,9 +273,6 @@ export default function TransactionsPage() {
                                   }
                                   onSuccess={fetchAllTransactions}
                                 />
-                                <Button variant="ghost" size="sm">
-                                  <Trash className="h-4 w-4" />
-                                </Button>
                               </div>
                             </td>
                           </tr>

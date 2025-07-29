@@ -2,10 +2,20 @@
 
 import { createSchemaDialog } from './SchemaFormDialog'
 import { UpdateMemberSchema, CreateMemberSchema, type Member } from '@/app/lib/schemas/member'
-import { updateMember, createMember } from '@/app/lib/api/members'
+import { updateMember, createMember, deleteMember } from '@/app/lib/api/members'
 import { Button } from '@/components/ui/button'
-import { Edit, UserPlus } from 'lucide-react'
+import { Edit, UserPlus, Trash, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import { toast } from 'sonner'
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from '@/components/ui/dialog'
 
 // Types for the dialog props
 interface EditMemberDialogProps {
@@ -141,5 +151,139 @@ export function FlexibleEditMemberDialog({
       onOpenChange={onOpenChange}
       onSuccess={onSuccess}
     />
+  )
+} 
+
+/* ------------------------------------------------------------
+ * Delete Member Dialog (two-step confirmation)
+ * ---------------------------------------------------------- */
+interface DeleteMemberDialogProps {
+  member: Member
+  trigger?: React.ReactNode
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+  onSuccess?: () => void
+}
+
+export function DeleteMemberDialog({
+  member,
+  trigger,
+  open,
+  onOpenChange,
+  onSuccess,
+}: DeleteMemberDialogProps) {
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [step, setStep] = useState<'confirm' | 'success'>('confirm')
+  const [processing, setProcessing] = useState(false)
+
+  async function handleDelete() {
+    try {
+      setProcessing(true)
+      await deleteMember(member.memberID)
+      toast.success(`Member "${member.firstName} ${member.lastName}" deleted successfully`)
+      if (onSuccess) onSuccess()
+      setStep('success')
+    } catch (err) {
+      console.error('Error deleting member:', err)
+      
+      // Extract meaningful error message from server response
+      let errorMessage = 'Failed to delete member'
+      if (err && typeof err === 'object') {
+        const serverError = err as any
+        if (serverError.detail) {
+          errorMessage = serverError.detail
+        } else if (serverError.title) {
+          errorMessage = serverError.title
+        } else if (serverError.message) {
+          errorMessage = serverError.message
+        } else if (typeof serverError === 'string') {
+          errorMessage = serverError
+        }
+      }
+      
+      toast.error(errorMessage)
+    } finally {
+      setProcessing(false)
+    }
+  }
+
+  return (
+    <Dialog
+      open={open !== undefined ? open : dialogOpen}
+      onOpenChange={(o) => {
+        if (!o) setStep('confirm')
+        if (onOpenChange) onOpenChange(o)
+        setDialogOpen(o)
+      }}
+    >
+      <DialogTrigger asChild>
+        {trigger ?? (
+          <Button variant="ghost" size="sm">
+            <Trash className="h-4 w-4" />
+          </Button>
+        )}
+      </DialogTrigger>
+
+      <DialogContent className="sm:max-w-[420px]">
+        {step === 'confirm' ? (
+          <>
+            <DialogHeader>
+              <DialogTitle>Delete Member – Confirm</DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-1 text-sm">
+              <div>
+                <span className="font-medium">Member&nbsp;ID:</span>{' '}
+                {member.memberID}
+              </div>
+              <div>
+                <span className="font-medium">Name:</span> {member.firstName}{' '}
+                {member.lastName}
+              </div>
+              <div>
+                <span className="font-medium">Email:</span> {member.email}
+              </div>
+            </div>
+
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button variant="outline">
+                  <X className="h-4 w-4 mr-2" />
+                  Cancel
+                </Button>
+              </DialogClose>
+              <Button
+                onClick={handleDelete}
+                disabled={processing}
+                variant="destructive"
+              >
+                {processing ? 'Deleting…' : 'Delete'}
+              </Button>
+            </DialogFooter>
+          </>
+        ) : (
+          /* -------------- success step -------------- */
+          <>
+            <DialogHeader>
+              <DialogTitle>Member Deleted</DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-1 text-sm">
+              Member{' '}
+              <span className="font-medium">
+                {member.firstName} {member.lastName}
+              </span>{' '}
+              was removed successfully.
+            </div>
+
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button>Done</Button>
+              </DialogClose>
+            </DialogFooter>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
   )
 } 
