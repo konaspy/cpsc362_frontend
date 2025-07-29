@@ -10,7 +10,8 @@ export type ReportType =
   | "books"
   | "books-overdue"
   | "books-available"
-  | "overdue-summary";
+  | "overdue-summary"
+  | "borrowing-summary";
 
 const API_BASE = "http://localhost:80";
 

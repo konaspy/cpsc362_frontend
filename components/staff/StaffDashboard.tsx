@@ -18,18 +18,40 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import StaffSidebar from "./StaffSidebar";
-import { Search, BookOpen, LogOut, Settings, HelpCircle } from "lucide-react";
+import { ReportTable } from "./ReportTables";
+import { Search, BookOpen, LogOut, Settings, HelpCircle, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { useReportCounts } from "@/hooks/use-report-counts";
+import { useReportData } from "@/hooks/use-report-data";
+import { ReportType } from "@/app/lib/api";
+
+const REPORT_OPTIONS = [
+  { value: "transactions" as ReportType, label: "All Transactions" },
+  { value: "transactions-overdue" as ReportType, label: "Overdue Transactions" },
+  { value: "transactions-compliant" as ReportType, label: "Compliant Transactions" },
+  { value: "members" as ReportType, label: "All Members" },
+  { value: "members-overdue" as ReportType, label: "Members with Overdue Books" },
+  { value: "members-borrowing" as ReportType, label: "Members Currently Borrowing" },
+  { value: "books" as ReportType, label: "All Books" },
+  { value: "books-overdue" as ReportType, label: "Books Currently Overdue" },
+  { value: "books-available" as ReportType, label: "Books Available for Borrowing" },
+  { value: "overdue-summary" as ReportType, label: "Overdue Summary Report" },
+  { value: "borrowing-summary" as ReportType, label: "Borrowing Summary Report" },
+];
 
 export default function StaffDashboard() {
-  const [activeTab, setActiveTab] = useState("loans");
+  const [selectedReport, setSelectedReport] = useState<ReportType>("transactions");
   
   const { loading, error, counts } = useReportCounts({
     activeLoans: "transactions",
     overdueBooks: "books-overdue", 
     availableBooks: "books-available",
   });
+
+  // Fetch data for the selected report
+  const reportData = useReportData(selectedReport);
+
+  const selectedReportLabel = REPORT_OPTIONS.find(option => option.value === selectedReport)?.label || "Select Report";
 
   return (
     <SidebarProvider>
@@ -143,84 +165,35 @@ export default function StaffDashboard() {
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>Library Management</CardTitle>
-                <div className="flex space-x-2">
-                  <Button
-                    variant={activeTab === "loans" ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setActiveTab("loans")}
-                  >
-                    Active Loans
-                  </Button>
-                  <Button
-                    variant={activeTab === "overdue" ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setActiveTab("overdue")}
-                  >
-                    Overdue
-                  </Button>
-                  <Button
-                    variant={activeTab === "books" ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setActiveTab("books")}
-                  >
-                    All Books
-                  </Button>
-                  <Button
-                    variant={activeTab === "members" ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setActiveTab("members")}
-                  >
-                    All Members
-                  </Button>
-                </div>
+                <CardTitle>Library Reports</CardTitle>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="w-64">
+                      {selectedReportLabel}
+                      <ChevronDown className="ml-2 h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-64">
+                    {REPORT_OPTIONS.map((option) => (
+                      <DropdownMenuItem
+                        key={option.value}
+                        onClick={() => setSelectedReport(option.value)}
+                        className={selectedReport === option.value ? "bg-accent" : ""}
+                      >
+                        {option.label}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </CardHeader>
             <CardContent>
-              {activeTab === "loans" && (
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-2">
-                    <Input placeholder="Search active loans..." className="max-w-sm" />
-                    <Button variant="outline" size="sm">Filter</Button>
-                  </div>
-                  <div className="text-center py-8 text-muted-foreground">
-                    Active loans table will be implemented here
-                  </div>
-                </div>
-              )}
-              {activeTab === "overdue" && (
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-2">
-                    <Input placeholder="Search overdue books..." className="max-w-sm" />
-                    <Button variant="outline" size="sm">Filter</Button>
-                  </div>
-                  <div className="text-center py-8 text-muted-foreground">
-                    Overdue books table will be implemented here
-                  </div>
-                </div>
-              )}
-              {activeTab === "books" && (
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-2">
-                    <Input placeholder="Search all books..." className="max-w-sm" />
-                    <Button variant="outline" size="sm">Filter</Button>
-                  </div>
-                  <div className="text-center py-8 text-muted-foreground">
-                    All books table will be implemented here
-                  </div>
-                </div>
-              )}
-              {activeTab === "members" && (
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-2">
-                    <Input placeholder="Search members..." className="max-w-sm" />
-                    <Button variant="outline" size="sm">Filter</Button>
-                  </div>
-                  <div className="text-center py-8 text-muted-foreground">
-                    Members table will be implemented here
-                  </div>
-                </div>
-              )}
+              <ReportTable
+                data={reportData.data}
+                loading={reportData.loading}
+                error={reportData.error}
+                reportType={selectedReport}
+              />
             </CardContent>
           </Card>
         </main>

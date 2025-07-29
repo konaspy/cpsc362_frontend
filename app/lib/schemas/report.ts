@@ -12,7 +12,7 @@ export interface TransactionsReport {
   transactions: Transaction[];
 }
 
-export interface OverdueSummaryReport {
+export interface SummaryReport {
   summaries: Array<{
     transactionID: number;
     memberID: number;
@@ -20,5 +20,7 @@ export interface OverdueSummaryReport {
     memberFirstName: string;
     memberLastName: string;
     bookName: string;
+    borrowDate: string;
+    dueDate: string;
   }>;
 } 
