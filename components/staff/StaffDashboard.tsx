@@ -18,11 +18,18 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import StaffSidebar from "./StaffSidebar";
-import { Search, BookOpen, UserPlus, LogOut, Settings, HelpCircle } from "lucide-react";
+import { Search, BookOpen, LogOut, Settings, HelpCircle } from "lucide-react";
 import { useState } from "react";
+import { useReportCounts } from "@/hooks/use-report-counts";
 
 export default function StaffDashboard() {
   const [activeTab, setActiveTab] = useState("loans");
+  
+  const { loading, error, counts } = useReportCounts({
+    activeLoans: "transactions",
+    overdueBooks: "books-overdue", 
+    availableBooks: "books-available",
+  });
 
   return (
     <SidebarProvider>
@@ -87,16 +94,18 @@ export default function StaffDashboard() {
         {/* Main Content */}
         <main className="flex-1 p-6">
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Active Loans</CardTitle>
                 <BookOpen className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">127</div>
+                <div className="text-2xl font-bold">
+                  {loading ? "..." : error ? "—" : counts.activeLoans ?? 0}
+                </div>
                 <p className="text-xs text-muted-foreground">
-                  +12 from last week
+                  Current transactions
                 </p>
               </CardContent>
             </Card>
@@ -106,7 +115,9 @@ export default function StaffDashboard() {
                 <Badge variant="destructive" className="h-4 w-4 rounded-full p-0 text-xs">!</Badge>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">8</div>
+                <div className="text-2xl font-bold">
+                  {loading ? "..." : error ? "—" : counts.overdueBooks ?? 0}
+                </div>
                 <p className="text-xs text-muted-foreground">
                   Require attention
                 </p>
@@ -118,21 +129,11 @@ export default function StaffDashboard() {
                 <BookOpen className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">1,243</div>
+                <div className="text-2xl font-bold">
+                  {loading ? "..." : error ? "—" : counts.availableBooks ?? 0}
+                </div>
                 <p className="text-xs text-muted-foreground">
                   Ready for checkout
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">New Members</CardTitle>
-                <UserPlus className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">23</div>
-                <p className="text-xs text-muted-foreground">
-                  This week
                 </p>
               </CardContent>
             </Card>

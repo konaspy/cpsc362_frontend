@@ -41,7 +41,7 @@ const navigation = [
   {
     label: "Dashboard",
     icon: Home,
-    href: "/staff/dashboard",
+    href: "/staff/",
   },
   {
     label: "Books",

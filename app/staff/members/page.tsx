@@ -10,7 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import { UserPlus, Search, Pencil, Trash, Users, Mail, IdCard, BookOpen, X } from "lucide-react";
 import { type Member } from "@/app/lib/schemas";
 import { getMembers } from "@/app/lib/api/members";
-import Link from "next/link";
+import { AddMemberDialog, EditMemberDialogWrapper } from "@/components/dialogs/memberDialogs";
+import { useReportCounts } from "@/hooks/use-report-counts";
 
 export default function MembersPage() {
   const [members, setMembers] = useState<Member[]>([]);
@@ -20,6 +21,13 @@ export default function MembersPage() {
     firstName: "",
     lastName: "",
     email: ""
+  });
+
+  const { loading: cardLoading, error: cardError, counts } = useReportCounts({
+    total: "members",
+    borrowing: "members-borrowing",
+    overdue: "members-overdue",
+    booksBorrowed: "transactions",
   });
 
   const handleSearch = async (e?: React.FormEvent) => {
@@ -79,12 +87,34 @@ export default function MembersPage() {
             <Users className="h-6 w-6" />
             <h1 className="text-2xl font-semibold">Members</h1>
           </div>
-          <Button asChild>
-            <Link href="/staff/members/add">
-              <UserPlus className="h-4 w-4 mr-2" />
-              Add Member
-            </Link>
-          </Button>
+          <div className="flex gap-2">
+            <AddMemberDialog
+              trigger={
+                <Button>
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Add Member
+                </Button>
+              }
+              onSuccess={fetchAllMembers}
+            />
+            <EditMemberDialogWrapper
+              member={{ memberID: 0, firstName: '', lastName: '', email: '' }}
+              trigger={
+                <Button variant="outline">
+                  <Pencil className="h-4 w-4 mr-2" />
+                  Edit Member
+                </Button>
+              }
+              onSuccess={fetchAllMembers}
+              placeholders={{
+                firstName: 'New first name (optional)',
+                lastName: 'New last name (optional)',
+                email: 'New email (optional)',
+                username: 'Username (optional)',
+                password: 'New password (optional)'
+              }}
+            />
+          </div>
         </div>
 
         {/* Stats Cards */}
@@ -95,7 +125,9 @@ export default function MembersPage() {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{members.length}</div>
+              <div className="text-2xl font-bold">
+                {cardLoading ? "..." : cardError ? "—" : counts.total ?? 0}
+              </div>
               <p className="text-xs text-muted-foreground">
                 Active library members
               </p>
@@ -107,7 +139,9 @@ export default function MembersPage() {
               <Badge variant="outline" className="h-4 w-4 rounded-full p-0 text-xs">!</Badge>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{members.length}</div>
+              <div className="text-2xl font-bold">
+                {cardLoading ? "..." : cardError ? "—" : counts.borrowing ?? 0}
+              </div>
               <p className="text-xs text-muted-foreground">
                 Currently borrowing books
               </p>
@@ -119,7 +153,9 @@ export default function MembersPage() {
               <Badge variant="destructive" className="h-4 w-4 rounded-full p-0">!</Badge>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{members.length}</div>
+              <div className="text-2xl font-bold">
+                {cardLoading ? "..." : cardError ? "—" : counts.overdue ?? 0}
+              </div>
               <p className="text-xs text-muted-foreground">
                 Need to return books
               </p>
@@ -128,10 +164,12 @@ export default function MembersPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Books Borrowed</CardTitle>
-              <BookOpen className="h-4 w-4 p-0">!</BookOpen>
+              <BookOpen className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{200}</div>
+              <div className="text-2xl font-bold">
+                {cardLoading ? "..." : cardError ? "—" : counts.booksBorrowed ?? 0}
+              </div>
               <p className="text-xs text-muted-foreground">
                 Total books borrowed by members
               </p>
@@ -237,11 +275,15 @@ export default function MembersPage() {
                             </td>
                             <td className="py-3 px-4">
                               <div className="flex items-center space-x-2">
-                                <Button variant="ghost" size="sm" asChild>
-                                  <Link href={`/staff/members/edit?memberID=${member.memberID}`}>
-                                    <Pencil className="h-4 w-4" />
-                                  </Link>
-                                </Button>
+                                <EditMemberDialogWrapper
+                                  member={member}
+                                  trigger={
+                                    <Button variant="ghost" size="sm">
+                                      <Pencil className="h-4 w-4" />
+                                    </Button>
+                                  }
+                                  onSuccess={fetchAllMembers}
+                                />
                                 <Button variant="ghost" size="sm">
                                   <Trash className="h-4 w-4" />
                                 </Button>
