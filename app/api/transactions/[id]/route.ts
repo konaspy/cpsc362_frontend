@@ -3,8 +3,9 @@ import { getTransaction, deleteTransaction } from '@/app/lib/api/transactions';
 import { PositiveInteger } from '@/app/lib/schemas';
 
 // GET /api/transactions/[id] - Get a specific transaction
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
+    const params = await context.params;
     const transactionId = PositiveInteger.parse(parseInt(params.id));
     const transaction = await getTransaction(transactionId);
     return NextResponse.json({ transaction });
@@ -15,8 +16,9 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 }
 
 // DELETE /api/transactions/[id] - Delete a specific transaction
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
+    const params = await context.params;
     const transactionId = PositiveInteger.parse(parseInt(params.id));
     const result = await deleteTransaction(transactionId);
     return NextResponse.json(result);

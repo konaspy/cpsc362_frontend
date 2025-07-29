@@ -3,8 +3,9 @@ import { getMember, updateMember, deleteMember } from '@/app/lib/api/members';
 import { UpdateMemberSchema, PositiveInteger } from '@/app/lib/schemas';
 
 // GET /api/members/[id] - Get a specific member
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
+    const params = await context.params;
     const memberId = PositiveInteger.parse(parseInt(params.id));
     const member = await getMember(memberId);
     return NextResponse.json({ member });
@@ -15,8 +16,9 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 }
 
 // PUT /api/members/[id] - Update a specific member
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
+    const params = await context.params;
     const memberId = PositiveInteger.parse(parseInt(params.id));
     const body = await req.json();
     const memberData = UpdateMemberSchema.parse(body);
@@ -29,8 +31,9 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 }
 
 // DELETE /api/members/[id] - Delete a specific member
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
+    const params = await context.params;
     const memberId = PositiveInteger.parse(parseInt(params.id));
     const result = await deleteMember(memberId);
     return NextResponse.json(result);

@@ -3,8 +3,9 @@ import { getBook, updateBook, deleteBook } from '@/app/lib/api/books';
 import { UpdateBookSchema, PositiveInteger } from '@/app/lib/schemas';
 
 // GET /api/books/[id] - Get a specific book
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
+    const params = await context.params;
     const bookId = PositiveInteger.parse(parseInt(params.id));
     const book = await getBook(bookId);
     return NextResponse.json({ book });
@@ -15,8 +16,9 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 }
 
 // PUT /api/books/[id] - Update a specific book
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
+    const params = await context.params;
     const bookId = PositiveInteger.parse(parseInt(params.id));
     const body = await req.json();
     const bookData = UpdateBookSchema.parse(body);
@@ -29,8 +31,9 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 }
 
 // DELETE /api/books/[id] - Delete a specific book
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
+    const params = await context.params;
     const bookId = PositiveInteger.parse(parseInt(params.id));
     const result = await deleteBook(bookId);
     return NextResponse.json(result);
