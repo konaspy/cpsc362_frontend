@@ -5,6 +5,7 @@ import { UpdateMemberSchema, CreateMemberSchema, type Member } from '@/app/lib/s
 import { updateMember, createMember } from '@/app/lib/api/members'
 import { Button } from '@/components/ui/button'
 import { Edit, UserPlus } from 'lucide-react'
+import { useMemo, useState } from 'react'
 
 // Types for the dialog props
 interface EditMemberDialogProps {
@@ -32,56 +33,63 @@ export const AddMemberDialog = createSchemaDialog({
 })
 
 // Edit Member Dialog Wrapper
-export function EditMemberDialogWrapper({ 
-  member, 
-  trigger, 
-  open, 
-  onOpenChange, 
-  onSuccess,
-  defaultValues,
-  placeholders
+export function EditMemberDialogWrapper({
+  member,
+  trigger,
+  onSuccess: refreshTable,   // rename for clarity
+  ...rest
 }: EditMemberDialogProps) {
-  const handleSubmit = async (data: any) => {
-    const updatedMember = await updateMember(member.memberID, data)
-    if (onSuccess) onSuccess()
-    return updatedMember // Return data to show confirmation
-  }
+  /* keep track of dialog open state */
+  const [open, setOpen] = useState(false);
 
-  // Create a new dialog with the member's current data as defaults
-  const MemberEditDialog = createSchemaDialog({
-    schema: UpdateMemberSchema,
-    title: 'Edit Member',
-    fields: [
-      { name: 'firstName', label: 'First Name', placeholder: 'Enter first name' },
-      { name: 'lastName', label: 'Last Name', placeholder: 'Enter last name' },
-      { name: 'email', label: 'Email', type: 'email', placeholder: 'Enter email address' },
-      { name: 'username', label: 'Username', placeholder: 'Enter username (optional)' },
-      { name: 'password', label: 'Password', type: 'password', placeholder: 'Enter new password (optional)' },
-    ],
-    onSubmit: handleSubmit,
-    // Factory-level defaults - these will be used for all instances of this dialog
-    defaultValues: {
-      firstName: member.firstName,
-      lastName: member.lastName,
-      email: member.email,
-      ...defaultValues // Allow overriding member defaults
-    }
-  })
+  const handleSubmit = async (data: any) => {
+    /* return truthy value so SchemaDialog enters confirmation mode */
+    return await updateMember(member.memberID, data);
+  };
+
+  const MemberEditDialog = useMemo(
+    () =>
+      createSchemaDialog({
+        schema: UpdateMemberSchema,
+        title: 'Edit Member',
+        fields: [
+          { name: 'firstName', label: 'First Name', placeholder: 'Enter first name' },
+          { name: 'lastName', label: 'Last Name', placeholder: 'Enter last name' },
+          { name: 'email', label: 'Email', type: 'email', placeholder: 'Enter email address' },
+          { name: 'username', label: 'Username', placeholder: 'Enter username (optional)' },
+          { name: 'password', label: 'Password', type: 'password', placeholder: 'Enter new password (optional)' },
+        ],
+        onSubmit: handleSubmit,
+        defaultValues: {
+          firstName: member.firstName,
+          lastName:  member.lastName,
+          email:     member.email,
+        },
+      }),
+    [member.memberID],
+  );
+
+  /* refresh the table only after the user closes the dialog */
+  function handleOpenChange(o: boolean) {
+    if (!o && refreshTable) refreshTable();
+    setOpen(o);
+  }
 
   return (
     <MemberEditDialog
-      trigger={trigger || (
-        <Button variant="outline" size="sm">
-          <Edit className="h-4 w-4 mr-2" />
-          Edit
-        </Button>
-      )}
+      trigger={
+        trigger ?? (
+          <Button variant="ghost" size="sm">
+            <Edit className="h-4 w-4" />
+          </Button>
+        )
+      }
       open={open}
-      onOpenChange={onOpenChange}
-      placeholders={placeholders}
-      onSuccess={onSuccess}
+      onOpenChange={handleOpenChange}
+      /* ─ do NOT pass onSuccess ─ */
+      {...rest}
     />
-  )
+  );
 }
 
 // Flexible Edit Member Dialog (using component-level defaultValues)

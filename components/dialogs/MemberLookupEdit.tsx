@@ -4,6 +4,7 @@ import { withLookup } from './LookupEditDialog'
 import { getMember, updateMember } from '@/app/lib/api/members'
 import { UpdateMemberSchema } from '@/app/lib/schemas/member'
 import { createSchemaDialog } from './SchemaFormDialog'
+import { useMemo } from "react";
 
 /* existing "plain" edit dialog factory */
 const buildMemberEditDialog = (member: any, onSuccess: () => void) =>
@@ -18,8 +19,8 @@ const buildMemberEditDialog = (member: any, onSuccess: () => void) =>
       { name: 'password', label: 'Password', type: 'password', placeholder: 'Enter new password (optional)' },
     ],
     onSubmit: async (data) => {
-      await updateMember(member.memberID, data)
-      onSuccess()
+      const updated = await updateMember(member.memberID, data);
+      return updated;                  // ← return truthy value
     },
   })
 
