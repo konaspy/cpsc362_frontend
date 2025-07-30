@@ -24,6 +24,7 @@ import { useState } from "react";
 import { useReportCounts } from "@/hooks/use-report-counts";
 import { useReportData } from "@/hooks/use-report-data";
 import { ReportType } from "@/app/lib/api";
+import { useRouter } from "next/navigation";
 
 const REPORT_OPTIONS = [
   { value: "transactions" as ReportType, label: "All Transactions" },
@@ -41,7 +42,7 @@ const REPORT_OPTIONS = [
 
 export default function StaffDashboard() {
   const [selectedReport, setSelectedReport] = useState<ReportType>("transactions");
-  
+  const router = useRouter();
   const { loading, error, counts } = useReportCounts({
     activeLoans: "transactions",
     overdueBooks: "books-overdue", 
@@ -69,7 +70,7 @@ export default function StaffDashboard() {
               <Button variant="outline" className="bg-red-500 text-white hover:bg-red-600" onClick={() => {
                 localStorage.removeItem('token');
                 localStorage.removeItem('role');
-                window.location.href = '/login';
+                router.push('/');
               }}>
                 <LogOut className="h-4 w-4 mr-2" />
                 Logout

@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/sidebar";
 import { BookOpen, UserPlus, Home, Users, BookOpenIcon, Receipt, BookOpenCheck, BookDown } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const quickActions = [
   {
@@ -62,14 +63,17 @@ const sidebarData = {
 }
 
 export default function StaffSidebar() {
+  const router = useRouter();
   return (
     <Sidebar>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" className="flex">
-              <BookOpen className="size-6!"/>
-              <span className="font-semibold text-lg">QuickShelf</span>
+            <SidebarMenuButton size="lg" className="flex items-center" onClick={() => {
+              router.push('/staff/');
+            }}>
+                <BookOpen className="size-6!"/>
+                <span className="font-semibold text-lg">QuickShelf</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
