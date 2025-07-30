@@ -13,6 +13,7 @@ import { getBooks } from "@/app/lib/api/books";
 import { AddBookDialog, EditBookDialogWrapper, DeleteBookDialog } from "@/components/dialogs/bookDialogs";
 import { useReportCounts } from "@/hooks/use-report-counts";
 import { EditBookByIdDialog } from "@/components/dialogs/BookLookupEdit";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 export default function BooksPage() {
   const [books, setBooks] = useState<Book[]>([]);

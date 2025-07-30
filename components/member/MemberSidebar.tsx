@@ -37,11 +37,20 @@ export default function MemberSidebar({ memberInfo }: { memberInfo: Member }) {
             <SidebarMenu>
               {/* Edit Profile */}
                 <SidebarMenuItem>
-                  <EditMemberDialogWrapper member={memberInfo} trigger={<Button variant="ghost" size="sm" className="w-full flex items-center justify-start gap-2">
+                  <EditMemberDialogWrapper member={memberInfo} trigger={<SidebarMenuButton>
                     <User className="h-4 w-4" />
                     <span className="justify-start">Edit Profile</span>
-                  </Button>}/>
+                  </SidebarMenuButton>}/>
                 </SidebarMenuItem>
+              {/* Book Search */}
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link href="/member/books">
+                    <BookOpen className="h-4 w-4" />
+                    <span className="justify-start">Book Search</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
