@@ -1,19 +1,44 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { LogIn, User, Lock, AlertCircle } from 'lucide-react'
+import { AddMemberDialog } from '@/components/dialogs/memberDialogs'
 
 export default function LoginPage() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [dialogOpen, setDialogOpen] = useState(false)
   const router = useRouter()
+  
+  useEffect(() => {
+    // Check if we're on the client side
+    if (typeof window !== 'undefined') {
+      try {
+        const token = localStorage.getItem('token')
+        const role = localStorage.getItem('role')
+        
+        if (token && role) {
+          if (role === 'admin') {
+            router.push('/staff')
+          } else if (role === 'user') {
+            router.push('/member')
+          }
+        }
+      } catch (error) {
+        console.error('Error accessing localStorage:', error)
+        // Clear potentially corrupted data
+        localStorage.removeItem('token')
+        localStorage.removeItem('role')
+      }
+    }
+  }, [router])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -31,17 +56,22 @@ export default function LoginPage() {
       }
 
       // Store token in localStorage (in production, consider more secure storage)
-      localStorage.setItem('token', data.data.token)
-      localStorage.setItem('role', data.data.role)
+      try {
+        localStorage.setItem('token', data.data.token)
+        localStorage.setItem('role', data.data.role)
+      } catch (error) {
+        console.error('Error storing authentication data:', error)
+        setError('Failed to store login credentials')
+        return
+      }
 
-      // Route to staff dashboard if role is staff
+      // Route to appropriate dashboard based on role
       if (data.data.role === 'admin') {
         router.push('/staff')
+      } else if (data.data.role === 'user') {
+        router.push('/member')
       } else {
-        alert('Login successful! Welcome ' + data.data.role)
-        // For other roles, you can redirect to different pages
-        // For now, we'll just show a success message
-        router.push('/staff')
+        setError('Unknown user role')
       }
     } catch (err) {
       setError('Network error. Please try again.')
@@ -111,6 +141,17 @@ export default function LoginPage() {
               {loading ? 'Logging in...' : 'Login'}
             </Button>
           </form>
+          <div className="mt-4 text-center">
+            <AddMemberDialog
+              trigger={
+                <Button variant="outline" className="w-full">
+                  Register
+                </Button>
+              }
+              open={dialogOpen}
+              onOpenChange={setDialogOpen}
+            />
+          </div>
 
           <div className="mt-6 text-center text-sm text-muted-foreground">
             <p>Demo credentials:</p>
@@ -120,4 +161,4 @@ export default function LoginPage() {
       </Card>
     </div>
   )
-} 
+}

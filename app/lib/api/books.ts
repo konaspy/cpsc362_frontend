@@ -1,4 +1,4 @@
-import { BookSchema, CreateBookRequest, UpdateBookRequest, type Book } from '../schemas';
+import { BookSchema, CreateBookRequest, UpdateBookRequest, type Book, type BookStatus } from '../schemas';
 import { z } from 'zod';
 
 const BASE_URL = process.env.BACKEND_URL || "http://127.0.0.1:80";
@@ -35,6 +35,14 @@ export async function getBook(bookId: number): Promise<Book> {
     const data = await response.json();
     console.log(data);
     return BookSchema.parse(data.data?.book);
+}
+
+export async function getBookStatus(bookId: number): Promise<BookStatus> {
+    const response = await fetch(`${BOOKS_URL}/${bookId}/status`);
+    if (!response.ok) {
+        throw await response.json();
+    }
+    return response.json();
 }
 
 export async function createBook(bookData: CreateBookRequest): Promise<Book> {

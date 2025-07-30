@@ -4,13 +4,19 @@ import { PositiveInteger, NonEmptyString } from './common';
 // Core Book schema for database entities
 export const BookSchema = z.object({
   bookID: PositiveInteger,
-  isbn: NonEmptyString,
+  isbn: NonEmptyString.length(13, 'ISBN must be 13 digits').regex(/^\d+$/, 'ISBN must be numbers only'),
   bookName: NonEmptyString,
   authorName: NonEmptyString
 });
 
+export const BookStatusSchema = z.object({
+  bookID: PositiveInteger,
+  isBorrowed: z.boolean(),
+});
+
 // Inferred TypeScript type
 export type Book = z.infer<typeof BookSchema>;
+export type BookStatus = z.infer<typeof BookStatusSchema>;
 
 // Schema for creating new books (no bookID)
 export const CreateBookSchema = BookSchema.omit({ bookID: true });
