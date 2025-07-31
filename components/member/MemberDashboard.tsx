@@ -124,15 +124,6 @@ export default function MemberDashboard() {
               <h1 className="text-2xl font-semibold">Member Dashboard</h1>
             </div>
             <div className="flex gap-2 items-center">
-              <div className="relative">
-                <Input
-                  placeholder="Search books..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pr-8 w-64"
-                />
-                <Search className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              </div>
               <Button
                 variant="outline"
                 className="bg-red-500 text-white hover:bg-red-600"
@@ -239,15 +230,6 @@ export default function MemberDashboard() {
                           </td>
                           <td className={`p-2 ${isOverdue(loan.dueDate) ? 'text-destructive font-medium' : ''}`}>
                             {formatDate(loan.dueDate)}
-                          </td>
-                          <td className="p-2">
-                            <Button
-                              size="sm"
-                              variant={isOverdue(loan.dueDate) ? "destructive" : "outline"}
-                              onClick={() => handleReturn(loan.transactionID)}
-                            >
-                              Return
-                            </Button>
                           </td>
                         </tr>
                       ))}
